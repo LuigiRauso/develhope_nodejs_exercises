@@ -24,7 +24,7 @@ const logIn = async (req: Request, res: Response) => {
       res.status(400).json({ msg: "Username or password incorrect." });
     }
   } catch (error) {
-    res.status(500).json({ msg: "An error occurred during sign up." });
+    res.status(500).json({ msg: "An error occurred during login." });
   }
 };
 
