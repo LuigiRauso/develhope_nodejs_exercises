@@ -24,22 +24,34 @@ const logIn = async (req: Request, res: Response) => {
       res.status(400).json({ msg: "Username or password incorrect." });
     }
   } catch (error) {
-    res.status(500).json({ msg: "An error occurred during sign up." });
+    res.status(500).json({ msg: "An error occurred during log in." });
   }
 };
 
 const signUp = async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
-  const user = db.oneOrNone(`SELECT * FROM users WHERE username=$1`, username);
+  try {
+    const user = await db.oneOrNone(`SELECT * FROM users WHERE username=$1`, username);
 
-  if (await user) {
-    res.status(409).json({ msg: "Username already in use" });
-  } else {
-    const { id } = await db.one(`INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id`, [username, password]);
+    if (user) {
+      res.status(409).json({ msg: "Username already in use" });
+    } else {
+      const { id } = await db.one(`INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id`, [username, password]);
 
-    res.status(201).json({ id, msg: "Signup successful. Now you can log in." });
+      res.status(201).json({ id, msg: "Signup successful. Now you can log in." });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "An error occurred during signup." });
   }
 };
 
-export { logIn, signUp };
+const logOut = async (req: Request, res: Response) => {
+  const user: any = req.user;
+
+  await db.none(`UPDATE users SET token=NULL WHERE id=$1`, [user?.id, null]);
+  res.status(200).json({ msg: "Logout successful" });
+};
+
+export { logIn, signUp, logOut };
