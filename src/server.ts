@@ -5,6 +5,7 @@ import morgan from "morgan";
 import multer from "multer";
 
 import { getAll, getOneById, create, updateById, deleteById, createImage } from "./controllers/planets.js";
+import { logIn, signUp } from "./controllers/users.js";
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -43,6 +44,12 @@ app.delete("/api/planets/:id", deleteById);
 
 // ADD IMAGE
 app.post("/api/planets/:id/image", upload.single("image"), createImage);
+
+// LOGIN
+app.post("/api/users/login", logIn);
+
+// SIGN UP
+app.post("/api/users/signup", signUp);
 
 app.listen(port, () => {
   console.log(`Server is running on port http://localhost:${port}`);
