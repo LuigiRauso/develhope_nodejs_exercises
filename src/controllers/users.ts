@@ -31,14 +31,19 @@ const logIn = async (req: Request, res: Response) => {
 const signUp = async (req: Request, res: Response) => {
   const { username, password } = req.body;
 
-  const user = db.oneOrNone(`SELECT * FROM users WHERE username=$1`, username);
+  try {
+    const user = await db.oneOrNone(`SELECT * FROM users WHERE username=$1`, username);
 
-  if (await user) {
-    res.status(409).json({ msg: "Username already in use" });
-  } else {
-    const { id } = await db.one(`INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id`, [username, password]);
+    if (user) {
+      res.status(409).json({ msg: "Username already in use" });
+    } else {
+      const { id } = await db.one(`INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id`, [username, password]);
 
-    res.status(201).json({ id, msg: "Signup successful. Now you can log in." });
+      res.status(201).json({ id, msg: "Signup successful. Now you can log in." });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "An error occurred during signup." });
   }
 };
 
